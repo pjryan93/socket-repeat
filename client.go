@@ -5,23 +5,50 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-func InitClient(attackUrl string) (client *websocket.Conn) {
+type wsClient struct  {
+	socket *websocket.Conn
+	exitFlag chan struct{}
+}
+
+func InitClient(attackUrl string) (c wsClient) {
 	client, _, err := websocket.DefaultDialer.Dial(attackUrl, nil)
 	if err != nil {
 		log.Fatal("dial:", err)
 	}
-	return client
+	c.socket = client
+	c.exitFlag = make(chan struct{})
+	return c
 }
 
-func setSocketListener(client *websocket.Conn, done chan struct{}) {
-	defer close(done)
+func (c wsClient) startListener() {
+	defer close(c.exitFlag)
 	for {
-		_, message, err := client.ReadMessage()
+		_, message, err := c.socket.ReadMessage()
 		if err != nil {
 			log.Println("read:", err)
 			return
 		}
 		log.Printf("recv: %s", message)
 	}
+}
+
+func (c wsClient) gracefullExit() {
+	err := c.socket.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+	if err != nil {
+		log.Println("write close:", err)
+		return
+	}
+}
+
+func (c wsClient) send(message string) {
+	err := c.socket.WriteMessage(websocket.TextMessage, []byte(message))
+	if err != nil {
+		log.Println("write err:", err)
+		return
+	}
+}
+
+func (c wsClient) close() {
+	c.socket.Close()
 }
 
