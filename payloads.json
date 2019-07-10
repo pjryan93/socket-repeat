@@ -1,0 +1,28 @@
+{
+	"payloads": [
+		{
+			"action": "send",
+			"body" : "test message"
+		},
+		{
+			"action": "wait",
+			"body" : "1"
+		},
+		{
+			"action": "send",
+			"body" : "test second send message"
+		},
+		{
+			"action": "send",
+			"body" : "test message"
+		},
+		{
+			"action": "wait",
+			"body" : "1"
+		},
+		{
+			"action": "send",
+			"body" : "test second send message"
+		}
+	]
+}
