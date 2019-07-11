@@ -9,10 +9,10 @@ import (
 	"log"
 )
 
-
 type Fuzzer struct {
 	socket  wsClient
 	payloads Payloads
+	responses chan WsResponse
 }
 
 func createFuzzer(url, inputPath string) (socketFuzzer Fuzzer){
@@ -20,9 +20,9 @@ func createFuzzer(url, inputPath string) (socketFuzzer Fuzzer){
 	var client = InitClient(url)
 	socketFuzzer.socket = client
 	socketFuzzer.payloads = payloads
+	socketFuzzer.responses = make(chan WsResponse)
 	return socketFuzzer
 }
-
 
 func (fuzzer Fuzzer) fuzz() {
 	interrupt := make(chan os.Signal, 1)
@@ -64,8 +64,9 @@ func (fuzzer Fuzzer) handlePayload(payload Payload) {
 
 func Run(attackUrl, inputPath string) {
 	fuzzer := createFuzzer(attackUrl, inputPath)
-	go fuzzer.socket.startListener()
+	go fuzzer.socket.startListener(fuzzer.responses)
 	defer fuzzer.socket.close()
 	fmt.Println("created client, started listening, begining fuzz on ", attackUrl);
 	fuzzer.fuzz()
+	fmt.Println(<-fuzzer.responses)
 }

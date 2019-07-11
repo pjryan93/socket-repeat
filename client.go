@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"time"
 	"github.com/gorilla/websocket"
 )
 
@@ -20,7 +21,7 @@ func InitClient(attackUrl string) (c wsClient) {
 	return c
 }
 
-func (c wsClient) startListener() {
+func (c wsClient) startListener(r chan WsResponse) {
 	defer close(c.exitFlag)
 	for {
 		_, message, err := c.socket.ReadMessage()
@@ -29,6 +30,10 @@ func (c wsClient) startListener() {
 			return
 		}
 		log.Printf("recv: %s", message)
+		var response WsResponse
+		response.message = string(message)
+		response.timeRecv = time.Now().Format("20060102150405")
+		r <- response
 	}
 }
 
