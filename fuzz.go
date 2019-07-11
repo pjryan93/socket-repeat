@@ -12,7 +12,8 @@ import (
 type Fuzzer struct {
 	socket  wsClient
 	payloads Payloads
-	responses chan WsResponse
+	responses chan WsMessage
+	sent chan WsMessage
 }
 
 func createFuzzer(url, inputPath string) (socketFuzzer Fuzzer){
@@ -20,7 +21,8 @@ func createFuzzer(url, inputPath string) (socketFuzzer Fuzzer){
 	var client = InitClient(url)
 	socketFuzzer.socket = client
 	socketFuzzer.payloads = payloads
-	socketFuzzer.responses = make(chan WsResponse)
+	socketFuzzer.responses = make(chan WsMessage)
+	socketFuzzer.sent = make(chan WsMessage)
 	return socketFuzzer
 }
 
@@ -50,6 +52,7 @@ func (fuzzer Fuzzer) handlePayload(payload Payload) {
 	switch action := payload.Action; action {
 	case "send":
 		fuzzer.socket.send(payload.Body)
+		fuzzer.sent <- WsMessage{payload.Body, time.Now().Format("20060102150405")}
 		fmt.Println("sent ", payload.Body);
 	case "wait":
 		ms, err := strconv.Atoi(payload.Body)

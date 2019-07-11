@@ -3,8 +3,8 @@ package main
 import (
 	"os"
 	"encoding/json"
-    "fmt"
-    "io/ioutil"
+	"fmt"
+	"io/ioutil"
 )
 
 type Payload struct {

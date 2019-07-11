@@ -21,7 +21,7 @@ func InitClient(attackUrl string) (c wsClient) {
 	return c
 }
 
-func (c wsClient) startListener(r chan WsResponse) {
+func (c wsClient) startListener(r chan WsMessage) {
 	defer close(c.exitFlag)
 	for {
 		_, message, err := c.socket.ReadMessage()
@@ -30,7 +30,7 @@ func (c wsClient) startListener(r chan WsResponse) {
 			return
 		}
 		log.Printf("recv: %s", message)
-		var response WsResponse
+		var response WsMessage
 		response.message = string(message)
 		response.timeRecv = time.Now().Format("20060102150405")
 		r <- response

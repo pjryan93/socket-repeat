@@ -1,6 +1,6 @@
 package main
 
-type WsResponse struct {
+type WsMessage struct {
 	timeRecv string
 	message string
 }
